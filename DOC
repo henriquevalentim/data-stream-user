@@ -1,0 +1,25 @@
+Criar docker-compose com Kafka,zookeper, postgres, mongodb
+
+Criar tabela user
+CREATE TABLE IF NOT EXISTS "users" (
+    id VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(255)  NOT NULL,
+    email VARCHAR(255)  NOT NULL,
+    genre VARCHAR(255)  NOT NULL,
+    register_date TIMESTAMP
+);
+
+Criar algoritmo python para enviar usuario para um topico(user) Kafka
+Usuario
+    id
+    name
+    email
+    birthdate
+    status
+    genre
+
+Criar algoritmo java para ler as mensagens do kafka e enviar para o postgres e mongodb
+
+
+Executar o flink
+./bin/flink run -c Main ../../estudos/data-streaming-user/target/flink-kafka2postgres-1.0-SNAPSHOT.jar
