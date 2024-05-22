@@ -22,4 +22,4 @@ Criar algoritmo java para ler as mensagens do kafka e enviar para o postgres e m
 
 
 Executar o flink
-./bin/flink run -c Main ../../estudos/data-streaming-user/target/flink-kafka2postgres-1.0-SNAPSHOT.jar
+./bin/flink run -c Main ../../estudos/data-stream-user/target/flink-kafka2postgres-1.0-SNAPSHOT.jar
