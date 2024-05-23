@@ -10,10 +10,13 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.bson.Document;
 
 import Deserializer.UserDeserializationSchema;
+import Deserializer.UserToDocumentConverter;
 import Dto.GenreCount;
 import Dto.User;
+import Sink.MongoSink;
 
 public class Main {
 
@@ -21,6 +24,11 @@ public class Main {
     private static final String JDBC_URL = "jdbc:postgresql://localhost:5432/postgres";
     private static final String USERNAME = "postgres";
     private static final String PASSWORD = "postgres";
+    private static final String MONGO_USERNAME = "root";
+    private static final String MONGO_PASSWORD = "123456";
+    private static final String MONGO_URI = "mongodb://" + MONGO_USERNAME + ":" + MONGO_PASSWORD + "@localhost:27017";
+    private static final String MONGO_DATABASE = "users";
+    private static final String MONGO_COLLECTION = "users";
 
     public static void main(String[] args) throws Exception {
 
@@ -41,17 +49,17 @@ public class Main {
         DataStreamSource<User> usersStream = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Source");
 
         JdbcExecutionOptions execOptions = new JdbcExecutionOptions.Builder()
-			.withBatchSize(1000)
-			.withBatchIntervalMs(200)
-			.withMaxRetries(5)
-			.build();
-		
-		JdbcConnectionOptions connOptions = new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-			.withUrl(JDBC_URL)
-			.withDriverName("org.postgresql.Driver")
-			.withUsername(USERNAME)
-			.withPassword(PASSWORD)
-			.build();
+            .withBatchSize(1000)
+            .withBatchIntervalMs(200)
+            .withMaxRetries(5)
+            .build();
+        
+        JdbcConnectionOptions connOptions = new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
+            .withUrl(JDBC_URL)
+            .withDriverName("org.postgresql.Driver")
+            .withUsername(USERNAME)
+            .withPassword(PASSWORD)
+            .build();
 
         SingleOutputStreamOperator<GenreCount> genderCounts = usersStream
                 .map(user -> new GenreCount(user.genre, 1))
@@ -71,7 +79,7 @@ public class Main {
         (JdbcStatementBuilder<User>) (preparedStatement, users) -> {}, 
         execOptions,
         connOptions
-		)).name("Create User Table Sink");
+        )).name("Create User Table Sink");
 
         usersStream.addSink(JdbcSink.sink(
             "CREATE TABLE IF NOT EXISTS genre_counts (" +
@@ -81,7 +89,7 @@ public class Main {
         (JdbcStatementBuilder<User>) (preparedStatement, users) -> {}, 
         execOptions,
         connOptions
-		)).name("Create genre_counts Table Sink");
+        )).name("Create genre_counts Table Sink");
 
         // Step 4: Add JDBC sink to the Kafka DataStream
         usersStream.addSink(JdbcSink.sink(
@@ -108,7 +116,12 @@ public class Main {
                 connOptions
         )).name("Genre Count PostgreSQL Sink");
 
+         // MongoDB sink for users
+         usersStream.addSink(new MongoSink<>(MONGO_URI, MONGO_DATABASE, MONGO_COLLECTION, new UserToDocumentConverter()))
+         .name("MongoDB Sink for Users");
+
         // Step 5: Execute the Flink job
-        env.execute("Kafka-flink-postgres");
+        env.execute("Kafka-flink-postgres-mongo");
     }
+    
 }
