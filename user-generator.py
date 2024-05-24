@@ -22,15 +22,15 @@ def generate_user():
         'registerDate': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f%z')
     }
 
-def generate_addresses(user_id):
+def generate_addresses(userId):
     addresses = []
     for _ in range(random.randint(1, 3)):
         address = {
-            "user_id": user_id,
+            "userId": userId,
             "address": fake.address(),
             "city": fake.city(),
             "state": fake.state(),
-            "zip_code": fake.zipcode(),
+            "zipCode": fake.zipcode(),
             "country": fake.country()
         }
         addresses.append(address)
@@ -49,9 +49,7 @@ def main():
         'bootstrap.servers': 'localhost:9092'
     })
 
-    curr_time = datetime.now()
-
-    while (datetime.now() - curr_time).seconds < 120:
+    for _ in range(10000):
         try:
             user = generate_user()
             addresses = generate_addresses(user['id'])
@@ -65,14 +63,15 @@ def main():
 
             # Produce address messages
             for address in addresses:
+                print(address)
                 producer.produce(address_topic,
-                                 key=address['user_id'],
+                                 key=address['userId'],
                                  value=json.dumps(address),
                                  on_delivery=delivery_report)
                 producer.poll(0)
             
             # Sleep to simulate time taken to generate next user and addresses
-            time.sleep(2)
+            # time.sleep(2)
         except BufferError:
             print("Buffer full! Waiting...")
             time.sleep(1)
