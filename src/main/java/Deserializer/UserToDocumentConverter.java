@@ -11,11 +11,11 @@ public class UserToDocumentConverter implements Function<User, Document>, Serial
     @Override
     public Document apply(User user) {
         Document doc = new Document();
-        doc.append("id", user.id);
-        doc.append("name", user.name);
-        doc.append("email", user.email);
-        doc.append("genre", user.genre);
-        doc.append("register_date", user.registerDate.toString());
+        doc.append("id", user.getId());
+        doc.append("name", user.getName());
+        doc.append("email", user.getEmail());
+        doc.append("genre", user.getGenre());
+        doc.append("register_date", user.getRegisterDate().toString());
         return doc;
     }
 }

@@ -10,12 +10,12 @@ public class AddressToDocumentConverter implements Function<Address, Document>, 
     @Override
     public Document apply(Address address) {
         Document doc = new Document();
-        doc.append("userId", address.userId);
-        doc.append("address", address.address);
-        doc.append("city", address.city);
-        doc.append("state", address.state);
-        doc.append("zip_code", address.zipCode);
-        doc.append("country", address.country);
+        doc.append("userId", address.getUserId());
+        doc.append("address", address.getAddress());
+        doc.append("city", address.getCity());
+        doc.append("state", address.getState());
+        doc.append("zip_code", address.getZipCode());
+        doc.append("country", address.getCountry());
         return doc;
     }
 }
